@@ -1,3 +1,22 @@
+##############################################################################################################################################
+#   Filename:       MyProg.py
+#   Summary:        This program is a circuit simulator that calculates the electrical parameters of a specified circuit based on
+#                   a provided configuration file. 
+#                   It supports frequency-dependent impedance calculations and can handle different types of components.
+#
+#   Description:    MyProg.py loads data from an input file using  DataExtract to create the frequecny sweep,
+#                   component details, and circuit terms. It handles both linear and logarithmic frequency sweeps
+#                   and supports different component types through the Impedance and FreqDepImpedence classes. 
+#                   The program attempts to construct a circuit using the Circ class, calculate all electrical
+#                   parameters, and export the results using the CircResultsExporter class. Error handling includes
+#                   generating an empty output file if any part of the process fails due to improper inputs 
+#                   or during the calculation process.
+#
+#   Version:        v3.08
+#   Date:           24/04/2024
+#   Authors:        Joshua O Poole
+##############################################################################################################################################
+
 import sys
 import numpy
 import math
@@ -10,9 +29,6 @@ from DataExtract import DataExtract
 from Impedence import Impedance, FreqDepImpedence, ComponentConnectionException, ComponentTypeException
 from Circ import Circ
 from CircResultsExporter import CircResultsExporter
-
-
-
 
 
 ##################################################################################################
