@@ -138,24 +138,24 @@ class Circ:
         return I1
     
     def Pin_CALC(self):
-        Pout = {}
+        Pin = {}
         # Iterate through each frequecny
         for F in self.Freq:
             V1 = self.Vin[F]
             I1 = self.Iin[F]
             # store result in a dict where freq maps to Pin value
-            Pout[F] = V1 * I1.conjugate()
-        return Pout
+            Pin[F] = V1 * I1.conjugate()
+        return Pin
     
     def Pout_CALC(self):
-        Pin = {}
+        Pout = {}
         # Iterate through each frequecny
         for F in self.Freq:
             V2 = self.Vout[F]
             I2 = self.Iout[F]
             # store result in a dict where freq maps to Pin value
-            Pin[F] = V2 * I2.conjugate()
-        return Pin
+            Pout[F] = V2 * I2.conjugate()
+        return Pout
     
     def Av_CALC(self):
         Av = {}
