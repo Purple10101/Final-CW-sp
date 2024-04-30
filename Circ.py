@@ -81,16 +81,8 @@ class Circ:
         }
         self.components_list_Ordored = self.Order_components()
         self.cascade_ABDC_mat = self.MAT_GEN()
-
-        self.Zin, self.Zout = self.Z_GEN()
-        self.Vin = self.Vin_CALC()
-        self.Iin = self.Iin_CALC()
-        self.Vout, self.Iout = self.calculate_VoutIout()
-        self.Pin = self.Pin_CALC()
-        self.Pout = self.Pout_CALC()
-        self.Av = self.Av_CALC()
-        self.Ai = self.Ai_CALC()
-        self.Ap = self.Ap_CALC()
+        self.Zin, self.Zout, self.Vin, self.Iin, self.Vout, self.Iout, self.Pin, self.Pout, self.Av, self.Ai, self.Ap = self.Clac_peram()
+        print("  ")
         
 
     def Order_components(self):
@@ -121,95 +113,46 @@ class Circ:
             MAT[F] = current_MAT
         return MAT
     
-    def Vin_CALC(self):
-        V1 = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            # store result in a dict where freq maps to V1 value
-            V1[F] = self.Vth * (self.Zin[F]/(self.Zin[F] + self.Rs))
-        return V1
-    
-    def Iin_CALC(self):
-        I1 = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            # store result in a dict where freq maps to I1 value
-            I1[F] = self.Vin[F]/self.Zin[F]
-        return I1
-    
-    def Pin_CALC(self):
-        Pin = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            V1 = self.Vin[F]
-            I1 = self.Iin[F]
-            # store result in a dict where freq maps to Pin value
-            Pin[F] = V1 * I1.conjugate()
-        return Pin
-    
-    def Pout_CALC(self):
-        Pout = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            V2 = self.Vout[F]
-            I2 = self.Iout[F]
-            # store result in a dict where freq maps to Pin value
-            Pout[F] = V2 * I2.conjugate()
-        return Pout
-    
-    def Av_CALC(self):
-        Av = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            A, B = self.cascade_ABDC_mat[F][0, 0], self.cascade_ABDC_mat[F][0, 1]
-            Z_L = self.LoadRes
-            # store result in a dict where freq maps to Av value
-            Av[F] = 1 / (A + B / Z_L)
-        return Av
-
-    def Ai_CALC(self):
-        Ai = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            # store result in a dict where freq maps to Ai value
-            Ai[F] = self.Iout[F]/self.Iin[F]
-        return Ai
-    
-    def Ap_CALC(self):
-        Ap = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            # store result in a dict where freq maps to Ap value
-            Ap[F] = self.Pout[F]/self.Pin[F]
-        return Ap
-
-    
-    def Z_GEN(self):
+    def Clac_peram(self):
         Zin = {}
         Zout = {}
-        # Iterate through each frequecny
+        V1 = {}
+        I1 = {}
+        V2 = {}
+        I2 = {}
+        Pin = {}
+        Pout = {}
+        Av = {}
+        Ai = {}
+        Ap = {}
         for F in self.Freq:
             A, B, C, D = self.cascade_ABDC_mat[F][0, 0], self.cascade_ABDC_mat[F][0, 1], self.cascade_ABDC_mat[F][1, 0], self.cascade_ABDC_mat[F][1, 1]
             Z_L = self.LoadRes
             Z_S = self.Rs
+
+            #Impedance calcs:
             # store result in a dict where freq maps to Zin and Zout values
             Zin[F] = (A * Z_L + B) / (C * Z_L + D)
             Zout[F] = (D * Z_S + B) / (C * Z_S + A)
-        return Zin, Zout
-    
-    def calculate_VoutIout(self):
-        V2 = {}
-        I2 = {}
-        # Iterate through each frequecny
-        for F in self.Freq:
-            ABCD = self.cascade_ABDC_mat[F]
-            A, B = ABCD[0, 0], ABCD[0, 1]
-            V1 = self.Vin[F]
-            Iout = V1/(A*self.LoadRes+B)
-            Vout = self.LoadRes * Iout
-            # store result in a dict where freq maps to V2 and I2 values
-            V2[F], I2[F] = Vout, Iout
-        return V2, I2
+
+            #Vin and Iin cacls:
+            V1[F] = self.Vth * (Zin[F]/(Zin[F] + Z_S))
+            I1[F] = V1[F]/Zin[F]
+
+            #Vout and Iout cacls:
+            I2[F] = V1[F]/(A*Z_L+B)
+            V2[F] = Z_L * I2[F]
+
+            #Pin and Pout calcs:
+            Pout[F] = V1[F] * I1[F].conjugate()
+            Pin[F] = V2[F] * I2[F].conjugate()
+
+            #Gain calcs:
+            Av[F] = 1 / (A + B / Z_L)
+            Ai[F] = I2[F]/I1[F]
+            Ap[F] = Pout[F]/Pin[F]
+
+        return Zin, Zout, V1, I1, V2, I2, Pin, Pout, Av, Ai, Ap
     
     def get_Ordered_Outputs(self, order):
         Outputs = {}
